@@ -3,7 +3,7 @@ import { systemPrompt } from "./systemPrompt";
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 
-console.log("hello");
+console.log("women in stem");
 
 // graveyard for the non working stuf 🪦🪦🪦🪦🪦🪦🪦🪦🪦🪦🪦🪦
 
