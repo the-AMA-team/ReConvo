@@ -1,44 +1,74 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from "react";
+import "./Chat.css";
 
 interface Message {
   id: string;
   content: string;
-  sender: 'user' | 'other';
+  sender: "user" | "other";
   timestamp: Date;
 }
 
-export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
+const SUGGESTED_PROMPTS = [
+  "What procedures?",
+  "Recovery time?",
+  "Consultation fees?",
+  "Financing options?",
+  "Office hours?",
+];
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
+export default function Chat() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      content: "Hello! How can I assist you today?",
+      sender: "other",
+      timestamp: new Date(),
+    },
+  ]);
+  const [newMessage, setNewMessage] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSendMessage = (content: string) => {
+    if (!content.trim()) return;
 
     const message: Message = {
       id: Date.now().toString(),
-      content: newMessage,
-      sender: 'user',
+      content: content,
+      sender: "user",
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, message]);
-    setNewMessage('');
+    setNewMessage("");
+  };
+
+  const handlePromptClick = (prompt: string) => {
+    handleSendMessage(prompt);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSendMessage(newMessage);
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="chat-wrapper">
       {!isOpen ? (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
-        >
+        <button onClick={() => setIsOpen(true)} className="chat-button">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            className="chat-button-icon"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -50,22 +80,22 @@ export default function Chat() {
               d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
             />
           </svg>
-          <span className="font-medium">Chat with us</span>
+          <span className="chat-button-text">Chat with us</span>
         </button>
       ) : (
-        <div className="flex flex-col h-[600px] w-[400px] bg-white rounded-2xl shadow-2xl transform transition-all duration-300 ease-in-out">
-          <div className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-2xl">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-              <h3 className="font-semibold">Live Chat</h3>
+        <div className="chat-container">
+          <div className="chat-header">
+            <div className="chat-header-left">
+              <div className="chat-status-dot"></div>
+              <h3 className="chat-header-title">Live Chat</h3>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white transition-colors"
+              className="chat-close-button"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="chat-close-icon"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -79,13 +109,13 @@ export default function Chat() {
               </svg>
             </button>
           </div>
-          
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+
+          <div className="chat-messages">
             {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+              <div className="chat-empty-state">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-12 w-12 mb-2"
+                  className="chat-empty-icon"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -98,49 +128,55 @@ export default function Chat() {
                   />
                 </svg>
                 <p>No messages yet</p>
-                <p className="text-sm">Start the conversation!</p>
               </div>
             ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.sender === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
+              <>
+                {messages.map((message) => (
                   <div
-                    className={`max-w-[70%] rounded-2xl p-3 ${
-                      message.sender === 'user'
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                        : 'bg-white shadow-sm'
+                    key={message.id}
+                    className={`chat-message ${
+                      message.sender === "user"
+                        ? "chat-message-user"
+                        : "chat-message-other"
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
-                    <span className={`text-xs ${message.sender === 'user' ? 'text-white/70' : 'text-gray-400'}`}>
-                      {message.timestamp.toLocaleTimeString()}
-                    </span>
+                    <div className="chat-message-content">
+                      <p className="chat-message-text">{message.content}</p>
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+                <div ref={messagesEndRef} />
+              </>
             )}
           </div>
 
-          <form onSubmit={handleSendMessage} className="p-4 bg-white border-t">
-            <div className="flex space-x-2">
+          <div className="chat-suggestions">
+            <div className="chat-suggestions-list">
+              {SUGGESTED_PROMPTS.map((prompt, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePromptClick(prompt)}
+                  className="chat-suggestion-button"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <form onSubmit={handleFormSubmit} className="chat-input-container">
+            <div className="chat-input-form">
               <input
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type a message..."
-                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="chat-input"
               />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+              <button type="submit" className="chat-send-button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
+                  className="chat-send-icon"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -159,4 +195,4 @@ export default function Chat() {
       )}
     </div>
   );
-} 
+}

@@ -1,4 +1,4 @@
-import { systemPrompt } from "./systemPrompt";
+import { systemPrompt } from "../systemPrompt";
 //import {userPrompt} from './userPrompt';
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
@@ -6,6 +6,7 @@ import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 console.log("women in stem");
 
+<<<<<<< HEAD
 // graveyard for the non working stuf 🪦🪦🪦🪦🪦🪦🪦🪦🪦🪦🪦🪦
 
 // POST is used to send data to a server to create/update a resource
@@ -13,6 +14,8 @@ console.log("women in stem");
 // dummy temp stuff
 let messageHistory: ChatCompletionMessageParam[]  = [{ role: "system", content: systemPrompt}];
 
+=======
+>>>>>>> d4a2edab6275e37ac217b2c075c9eaadf1c6f0d4
 export async function POST(req: NextRequest) {
   const openai = new OpenAI({
     // creates new openai client
