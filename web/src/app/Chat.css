@@ -126,8 +126,8 @@
 }
 
 .chat-message-content {
-  max-width: 70%;
-  padding: 1rem;
+  max-width: 85%;
+  padding: 1.25rem;
   border-radius: 1rem;
   font-size: 1.25rem;
   margin-bottom: 0;
@@ -257,4 +257,100 @@
   100% {
     opacity: 1;
   }
+}
+
+/* Form Styles */
+.chat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-group label {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select {
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  background-color: white;
+  min-height: 3.5rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.form-submit-button {
+  padding: 1rem 2rem;
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-top: 1rem;
+  min-height: 3.5rem;
+  width: 100%;
+}
+
+.form-submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
+}
+
+.form-submit-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Adjust the message content to accommodate larger form */
+.chat-message-content {
+  max-width: 85%;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  font-size: 1.25rem;
+}
+
+/* Make select dropdowns more prominent */
+.form-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.5rem;
+  padding-right: 3rem;
+}
+
+/* Add some spacing between form sections */
+.form-group + .form-group {
+  margin-top: 0.5rem;
+}
+
+/* Make number inputs more prominent */
+.form-group input[type="number"] {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+/* Add some visual separation between form sections */
+.form-group:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
 }

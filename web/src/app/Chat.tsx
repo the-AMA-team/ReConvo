@@ -8,14 +8,16 @@ interface Message {
   content: string;
   sender: "user" | "other";
   timestamp: Date;
+  isForm?: boolean;
 }
 
 const SUGGESTED_PROMPTS = [
-  "What procedures?",
+  "Procedures?",
   "Recovery time?",
   "Consultation fees?",
   "Financing options?",
   "Office hours?",
+  "Size?",
 ];
 
 export default function Chat() {
@@ -29,6 +31,15 @@ export default function Chat() {
   ]);
   const [newMessage, setNewMessage] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    chestBaseDiameter: "",
+    skinEnvelope: "",
+    tissueExposure: "",
+    ramotion: "",
+    laterality: "",
+    bmi: "",
+    aesthetic: "",
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -50,6 +61,21 @@ export default function Chat() {
     };
 
     setMessages((prev) => [...prev, message]);
+
+    // Special case for "Size?" prompt
+    if (content.toLowerCase() === "size?") {
+      setTimeout(() => {
+        const formMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: "Please fill out the following details:",
+          sender: "other",
+          timestamp: new Date(),
+          isForm: true,
+        };
+        setMessages((prev) => [...prev, formMessage]);
+      }, 500);
+    }
+
     setNewMessage("");
   };
 
@@ -58,6 +84,33 @@ export default function Chat() {
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const response: Message = {
+      id: Date.now().toString(),
+      content: `Thank you for providing your details:
+        - Chest Base Diameter: ${formData.chestBaseDiameter} cm
+        - Skin Envelope: ${formData.skinEnvelope}
+        - Tissue Exposure: ${formData.tissueExposure}
+        - Ramotion: ${formData.ramotion}
+        - Laterality: ${formData.laterality}
+        - BMI: ${formData.bmi}
+        - Desired Aesthetic: ${formData.aesthetic}`,
+      sender: "other",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, response]);
+    setFormData({
+      chestBaseDiameter: "",
+      skinEnvelope: "",
+      tissueExposure: "",
+      ramotion: "",
+      laterality: "",
+      bmi: "",
+      aesthetic: "",
+    });
+  };
+
+  const handleChatFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleSendMessage(newMessage);
   };
@@ -141,7 +194,135 @@ export default function Chat() {
                     }`}
                   >
                     <div className="chat-message-content">
-                      <p className="chat-message-text">{message.content}</p>
+                      {message.isForm ? (
+                        <form onSubmit={handleFormSubmit} className="chat-form">
+                          <div className="form-group">
+                            <label>Chest Base Diameter (cm)</label>
+                            <input
+                              type="number"
+                              value={formData.chestBaseDiameter}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  chestBaseDiameter: e.target.value,
+                                }))
+                              }
+                              required
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label>Skin Envelope</label>
+                            <select
+                              value={formData.skinEnvelope}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  skinEnvelope: e.target.value,
+                                }))
+                              }
+                              required
+                            >
+                              <option value="">Select</option>
+                              <option value="Y">Yes</option>
+                              <option value="N">No</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Tissue Exposure</label>
+                            <select
+                              value={formData.tissueExposure}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  tissueExposure: e.target.value,
+                                }))
+                              }
+                              required
+                            >
+                              <option value="">Select</option>
+                              <option value="Y">Yes</option>
+                              <option value="N">No</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Ramotion</label>
+                            <select
+                              value={formData.ramotion}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  ramotion: e.target.value,
+                                }))
+                              }
+                              required
+                            >
+                              <option value="">Select</option>
+                              <option value="Y">Yes</option>
+                              <option value="N">No</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Laterality</label>
+                            <select
+                              value={formData.laterality}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  laterality: e.target.value,
+                                }))
+                              }
+                              required
+                            >
+                              <option value="">Select</option>
+                              <option value="uni">Unilateral</option>
+                              <option value="bi">Bilateral</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>BMI</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={formData.bmi}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  bmi: e.target.value,
+                                }))
+                              }
+                              required
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label>Desired Aesthetic</label>
+                            <select
+                              value={formData.aesthetic}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  aesthetic: e.target.value,
+                                }))
+                              }
+                              required
+                            >
+                              <option value="">Select</option>
+                              <option value="small">Small</option>
+                              <option value="natural">Natural</option>
+                              <option value="large">Large</option>
+                            </select>
+                          </div>
+                          <button type="submit" className="form-submit-button">
+                            Submit
+                          </button>
+                        </form>
+                      ) : (
+                        <>
+                          <p className="chat-message-text">{message.content}</p>
+                          <span className="chat-message-timestamp">
+                            {message.timestamp.toLocaleTimeString()}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -164,7 +345,10 @@ export default function Chat() {
             </div>
           </div>
 
-          <form onSubmit={handleFormSubmit} className="chat-input-container">
+          <form
+            onSubmit={handleChatFormSubmit}
+            className="chat-input-container"
+          >
             <div className="chat-input-form">
               <input
                 type="text"

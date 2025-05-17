@@ -6,16 +6,15 @@ import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 console.log("women in stem");
 
-<<<<<<< HEAD
 // graveyard for the non working stuf 🪦🪦🪦🪦🪦🪦🪦🪦🪦🪦🪦🪦
 
 // POST is used to send data to a server to create/update a resource
 
 // dummy temp stuff
-let messageHistory: ChatCompletionMessageParam[]  = [{ role: "system", content: systemPrompt}];
+let messageHistory: ChatCompletionMessageParam[] = [
+  { role: "system", content: systemPrompt },
+];
 
-=======
->>>>>>> d4a2edab6275e37ac217b2c075c9eaadf1c6f0d4
 export async function POST(req: NextRequest) {
   const openai = new OpenAI({
     // creates new openai client
@@ -26,12 +25,14 @@ export async function POST(req: NextRequest) {
     const { prompt, factors, website } = await req.json(); // resume is a string; instagramData is a json object
 
     // NEED TO BUILD THE USER PROMPT HERE
-    const userPrompt = `prompt: ${prompt} factors: ${JSON.stringify(factors)} website: ${website}`; // this is the user prompt that will be sent to the model
+    const userPrompt = `prompt: ${prompt} factors: ${JSON.stringify(
+      factors
+    )} website: ${website}`; // this is the user prompt that will be sent to the model
 
     const local_systemPrompt = systemPrompt; // the system prompt is a set of instructions that tells the model how to behave
     const local_userPrompt = userPrompt; // the user prompt is the input that the model will respond to
 
-    messageHistory.push({role: "user", content: local_userPrompt}); // add the user prompt to the message history
+    messageHistory.push({ role: "user", content: local_userPrompt }); // add the user prompt to the message history
 
     const completion = await openai.beta.chat.completions.parse({
       model: "gpt-4o-2024-08-06",
@@ -42,11 +43,10 @@ export async function POST(req: NextRequest) {
       // ],
       messages: messageHistory,
       temperature: 0.4,
-    }) ;
+    });
 
     const response = completion.choices[0].message.content; //chatgpt returns an array of choices, so u chose the first one or something idk
     console.log(response);
-
 
     // Save assistant's reply to context
     messageHistory.push({ role: "assistant", content: response! });
@@ -54,12 +54,15 @@ export async function POST(req: NextRequest) {
     // const data = JSON.parse(response);
 
     const data = {
-      "response": response
-      }
+      response: response,
+    };
 
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error: ", error);
-    return NextResponse.json({ error: "alan lalwani messed up" }, { status: 500 });
+    return NextResponse.json(
+      { error: "alan lalwani messed up" },
+      { status: 500 }
+    );
   }
 }
