@@ -8,7 +8,7 @@
 
 /* Chat button */
 .chat-button {
-  background: linear-gradient(to right, #3b82f6, #2563eb);
+  background: linear-gradient(to right, #ec4899, #db2777);
   color: white;
   padding: 1rem;
   border-radius: 9999px;
@@ -51,7 +51,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: linear-gradient(to right, #3b82f6, #2563eb);
+  background: linear-gradient(to right, #ec4899, #db2777);
   color: white;
   border-top-left-radius: 1rem;
   border-top-right-radius: 1rem;
@@ -66,7 +66,7 @@
 .chat-status-dot {
   width: 0.75rem;
   height: 0.75rem;
-  background-color: #34d399;
+  background-color: #ec4899;
   border-radius: 9999px;
   animation: pulse 2s infinite;
 }
@@ -134,7 +134,7 @@
 }
 
 .chat-message-user .chat-message-content {
-  background: linear-gradient(to right, #3b82f6, #2563eb);
+  background: linear-gradient(to right, #ec4899, #db2777);
   color: white;
 }
 
@@ -221,12 +221,12 @@
 .chat-input:focus {
   outline: none;
   border-color: transparent;
-  box-shadow: 0 0 0 2px #3b82f6;
+  box-shadow: 0 0 0 2px #ec4899;
 }
 
 .chat-send-button {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(to right, #3b82f6, #2563eb);
+  background: linear-gradient(to right, #ec4899, #db2777);
   color: white;
   border-radius: 0.75rem;
   transition: all 0.2s;
@@ -239,7 +239,7 @@
 
 .chat-send-button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #3b82f6;
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.5);
 }
 
 .chat-send-icon {
@@ -293,13 +293,13 @@
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: #ec4899;
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2);
 }
 
 .form-submit-button {
   padding: 1rem 2rem;
-  background: linear-gradient(to right, #3b82f6, #2563eb);
+  background: linear-gradient(to right, #ec4899, #db2777);
   color: white;
   border-radius: 0.75rem;
   font-size: 1.25rem;
@@ -317,7 +317,7 @@
 
 .form-submit-button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.5);
 }
 
 /* Adjust the message content to accommodate larger form */
@@ -373,7 +373,7 @@
 .chat-loading-dot {
   width: 0.5rem;
   height: 0.5rem;
-  background-color: #6B7280;
+  background-color: #ec4899;
   border-radius: 50%;
   animation: loadingDot 1.4s infinite ease-in-out both;
 }
@@ -431,6 +431,7 @@
   padding: 0 1rem;
   transition: width 0.3s ease-in-out;
   position: relative;
+  background-color: #ec4899;
 }
 
 .chart-value {
@@ -461,4 +462,42 @@
 .chat-message-other .chat-message-content {
   background-color: white;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Header right section */
+.chat-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Download button */
+.chat-download-button {
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-download-button:hover {
+  color: white;
+  background-color: rgba(236, 72, 153, 0.2);
+}
+
+.chat-download-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Loading spinner in surgeon page */
+.animate-spin {
+  border-color: #ec4899;
+}
+
+/* Chart bar colors */
+.chart-bar:nth-child(odd) {
+  background-color: #db2777;
 }

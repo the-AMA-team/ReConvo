@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import "./Chat.css";
+import jsPDF from "jspdf";
 
 interface Message {
   id: string;
@@ -55,10 +56,10 @@ export default function Chat() {
 
   const generateResponse = async (prompt: string, factors?: any) => {
     try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
+      const response = await fetch("/api/generate", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           prompt,
@@ -68,13 +69,13 @@ export default function Chat() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate response');
+        throw new Error("Failed to generate response");
       }
 
       const data = await response.json();
       return data.response;
     } catch (error) {
-      console.error('Error generating response:', error);
+      console.error("Error generating response:", error);
       return "I apologize, but I'm having trouble generating a response right now. Please try again later.";
     }
   };
@@ -89,11 +90,11 @@ export default function Chat() {
           <div key={procedure} className="chart-bar-container">
             <div className="chart-label">{procedure}</div>
             <div className="chart-bar-wrapper">
-              <div 
-                className="chart-bar" 
-                style={{ 
+              <div
+                className="chart-bar"
+                style={{
                   width: `${(price / maxValue) * 100}%`,
-                  backgroundColor: price === maxValue ? '#3b82f6' : '#93c5fd'
+                  backgroundColor: price === maxValue ? "#3b82f6" : "#93c5fd",
                 }}
               >
                 <span className="chart-value">${price.toLocaleString()}</span>
@@ -101,9 +102,7 @@ export default function Chat() {
             </div>
           </div>
         ))}
-        <div className="chart-total">
-          Total: ${total.toLocaleString()}
-        </div>
+        <div className="chart-total">Total: ${total.toLocaleString()}</div>
       </div>
     );
   };
@@ -139,9 +138,9 @@ export default function Chat() {
       setIsLoading(false);
 
       // Check if response is a chart
-      if (aiResponse.startsWith('CHART ')) {
+      if (aiResponse.startsWith("CHART")) {
         try {
-          const chartData = JSON.parse(aiResponse.slice(6)); // Remove 'CHART ' prefix
+          const chartData = JSON.parse(aiResponse.slice(5)); // Remove 'CHART ' prefix
           const responseMessage: Message = {
             id: (Date.now() + 1).toString(),
             content: "Here's a comparison of procedure costs:",
@@ -152,7 +151,7 @@ export default function Chat() {
           };
           setMessages((prev) => [...prev, responseMessage]);
         } catch (error) {
-          console.error('Error parsing chart data:', error);
+          console.error("Error parsing chart data:", error);
           const errorMessage: Message = {
             id: (Date.now() + 1).toString(),
             content: "I apologize, but I couldn't generate the chart properly.",
@@ -200,7 +199,10 @@ export default function Chat() {
 
     // Generate AI response based on the form data
     setIsLoading(true);
-    const aiResponse = await generateResponse("Calculate breast implant size based on these factors:", formData);
+    const aiResponse = await generateResponse(
+      "Calculate breast implant size based on these factors:",
+      formData
+    );
     setIsLoading(false);
 
     const responseMessage: Message = {
@@ -225,6 +227,86 @@ export default function Chat() {
   const handleChatFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleSendMessage(newMessage);
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yOffset = 20;
+    const lineHeight = 10;
+    const margin = 20;
+    const maxWidth = pageWidth - margin * 2;
+
+    // Add title
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("Chat History", margin, yOffset);
+    yOffset += lineHeight * 2;
+
+    // Add timestamp
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, margin, yOffset);
+    yOffset += lineHeight * 2;
+
+    // Add messages
+    doc.setFontSize(12);
+    messages.forEach((message) => {
+      // Check if we need a new page
+      if (yOffset > doc.internal.pageSize.getHeight() - margin) {
+        doc.addPage();
+        yOffset = margin;
+      }
+
+      // Add sender and timestamp
+      doc.setFont("helvetica", "bold");
+      const sender = message.sender === "user" ? "You" : "Assistant";
+      doc.text(
+        `${sender} (${message.timestamp.toLocaleString()})`,
+        margin,
+        yOffset
+      );
+      yOffset += lineHeight;
+
+      // Add message content
+      doc.setFont("helvetica", "normal");
+
+      if (message.isForm) {
+        // Handle form data
+        const formContent = `Form Data:
+          - Chest Base Diameter: ${formData.chestBaseDiameter} cm
+          - Skin Envelope: ${formData.skinEnvelope}
+          - Tissue Exposure: ${formData.tissueExposure}
+          - Ramotion: ${formData.ramotion}
+          - Laterality: ${formData.laterality}
+          - BMI: ${formData.bmi}
+          - Desired Aesthetic: ${formData.aesthetic}`;
+
+        const splitText = doc.splitTextToSize(formContent, maxWidth);
+        doc.text(splitText, margin, yOffset);
+        yOffset += lineHeight * splitText.length;
+      } else if (message.isChart && message.chartData) {
+        // Handle chart data
+        const chartContent = `Chart Data:
+          ${Object.entries(message.chartData)
+            .map(([key, value]) => `${key}: $${value.toLocaleString()}`)
+            .join("\n")}`;
+
+        const splitText = doc.splitTextToSize(chartContent, maxWidth);
+        doc.text(splitText, margin, yOffset);
+        yOffset += lineHeight * splitText.length;
+      } else {
+        // Handle regular message
+        const splitText = doc.splitTextToSize(message.content, maxWidth);
+        doc.text(splitText, margin, yOffset);
+        yOffset += lineHeight * splitText.length;
+      }
+
+      yOffset += lineHeight; // Add space between messages
+    });
+
+    // Save the PDF
+    doc.save("chat-history.pdf");
   };
 
   return (
@@ -254,25 +336,43 @@ export default function Chat() {
               <div className="chat-status-dot"></div>
               <h3 className="chat-header-title">Live Chat</h3>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="chat-close-button"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="chat-close-icon"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            <div className="chat-header-right">
+              <button onClick={generatePDF} className="chat-download-button">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="chat-download-icon"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="chat-close-button"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="chat-close-icon"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div className="chat-messages">
