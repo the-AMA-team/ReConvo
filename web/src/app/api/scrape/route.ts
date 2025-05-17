@@ -1,4 +1,3 @@
-import { systemPrompt } from "./systemPrompt";
 //import {userPrompt} from './userPrompt';
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
@@ -12,11 +11,8 @@ export async function POST(req: NextRequest) {
   });
 
   try {
-    const { prompt, factors, website } = await req.json(); // resume is a string; instagramData is a json object
-
-    // NEED TO BUILD THE USER PROMPT HERE
-    const userPrompt = `Here is the website: ${website} Extract a detailed description as well as a cost of every procedure (write cannot determine if cost not found). `; // this is the user prompt that will be sent to the model
-
+    const { website } = await req.json(); // resume is a string; instagramData is a json object
+    const userPrompt = `here is the website link: ${website} Extract a detailed description of every procedure. RETURN WHATEVER RESPONSE IT IS IN QUOTATION MARKS`; // this is the user prompt that will be sent to the model
     const local_userPrompt = userPrompt; // the user prompt is the input that the model will respond to
 
     const completion = await openai.beta.chat.completions.parse({
@@ -28,10 +24,15 @@ export async function POST(req: NextRequest) {
       temperature: 0.4,
     });
 
+
     const response = completion.choices[0].message.content; //chatgpt returns an array of choices, so u chose the first one or something idk
+    
+    console.log("IS THIS WORKINGIGNIGN")
     console.log(response);
 
-    const data = JSON.parse(response);
+    const data = {
+      "response": response
+      }
 
     return NextResponse.json(data);
   } catch (error) {
