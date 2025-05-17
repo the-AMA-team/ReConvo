@@ -1,41 +1,29 @@
-# First install required libraries
-# pip install requests beautifulsoup4
+import openai
+from dotenv import load_dotenv
+import os
 
-import requests
-from bs4 import BeautifulSoup
+# Load environment variables from .env file
+load_dotenv()
 
-# Define the URL you want to scrape
-url = 'https://example.com'
+file = open("prompt.txt", "r")
 
-try:
-    # Send a GET request to the website
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
-    response = requests.get(url, headers=headers)
-    
-    # Check if the request was successful
-    response.raise_for_status()
+content = file.read()
+print(content)
+# Retrieve the API key from the environment
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    print('Response:')
-    print(response.text[:500])  # Print the first 500 characters of the response
-    
-    # Parse the HTML content using Beautiful Soup
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    # Example: Extract and print the page title
-    title = soup.title.text
-    print(f'Page Title: {title}')
-    
-    # Example: Extract all paragraphs and print their text
-    print('\nParagraphs:')
-    for paragraph in soup.find_all('p'):
-        print(paragraph.text)
-    
-    # Example: Extract all links
-    print('\nLinks:')
-    for link in soup.find_all('a'):
-        print(link.get('href'))
-        
-except requests.exceptions.RequestException as e:
-    print(f'Error fetching the page: {e}')
-except Exception as e:
-    print(f'An error occurred: {e}')
+print(openai.api_key)
+
+# # Make a request to the OpenAI Chat API
+# response = openai.ChatCompletion.create(
+#     model="gpt-4",
+#     messages=[
+#         {"role": "system", "content": "You"},
+#         {"role": "user", "content": "Explain the concept of reinforcement learning."}
+#     ],
+#     temperature=0.7,
+#     max_tokens=150
+# )
+
+# Print the result
+# print(response.choices[0].message['content'])
