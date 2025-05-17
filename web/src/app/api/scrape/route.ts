@@ -1,4 +1,4 @@
-import { systemPrompt } from "../systemPrompt";
+import { systemPrompt } from "./systemPrompt";
 //import {userPrompt} from './userPrompt';
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
@@ -15,15 +15,13 @@ export async function POST(req: NextRequest) {
     const { prompt, factors, website } = await req.json(); // resume is a string; instagramData is a json object
 
     // NEED TO BUILD THE USER PROMPT HERE
-    const userPrompt = `prompt: ${prompt} factors: ${JSON.stringify(factors)} website: ${website}`; // this is the user prompt that will be sent to the model
+    const userPrompt = `Here is the website: ${website} Extract a detailed description as well as a cost of every procedure (write cannot determine if cost not found). `; // this is the user prompt that will be sent to the model
 
-    const local_systemPrompt = systemPrompt; // the system prompt is a set of instructions that tells the model how to behave
     const local_userPrompt = userPrompt; // the user prompt is the input that the model will respond to
 
     const completion = await openai.beta.chat.completions.parse({
       model: "gpt-4o-2024-08-06",
       messages: [
-        { role: "system", content: local_systemPrompt }, // system --> set behavior
         { role: "user", content: local_userPrompt }, // user --> the question
         // assistant --> if u wanted to save chat history i guess (keep it context aware)
       ],
