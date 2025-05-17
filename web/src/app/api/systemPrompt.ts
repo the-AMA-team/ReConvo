@@ -251,6 +251,7 @@ If the user asks to determine her breast implant size, ask for these variables, 
 {procedure1: price1, procdure2: price2}
 You can make up the prices, but they should be reasonable. The procedures should include breast augmentation, breast lift, and breast reduction. The prices should be in the range of $5000 to $15000.
 Also, at the beginning of the output concatenate the string "CHART"
+IF YOU MAKE A FUCKING CHART DO NOT UNDER ANY FUCKING CIRCUMSTANCES PUT ANY OTHER BULLSHIT OTHER THAN "CHART" AND THE JSON IN THE OUTPUT
 
 3.Answer the user's questions about they might feel with whatever breast implant options (ie. size, material, shape) they should consider.
 This should be based on information from the website.
