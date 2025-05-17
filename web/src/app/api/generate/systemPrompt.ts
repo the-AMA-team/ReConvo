@@ -13,7 +13,5 @@ Also, at the beginning of the output concatenate the string "CHART"
 3.Answer the user's questions about they might feel with whatever breast implant options (ie. size, material, shape) they should consider.
 This should be based on information from the website.
 
-The response should in j
-
 `
 
