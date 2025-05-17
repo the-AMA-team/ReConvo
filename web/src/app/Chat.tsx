@@ -9,6 +9,8 @@ interface Message {
   sender: "user" | "other";
   timestamp: Date;
   isForm?: boolean;
+  isChart?: boolean;
+  chartData?: { [key: string]: number };
 }
 
 const SUGGESTED_PROMPTS = [
@@ -31,6 +33,7 @@ export default function Chat() {
   ]);
   const [newMessage, setNewMessage] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     chestBaseDiameter: "",
     skinEnvelope: "",
@@ -50,7 +53,62 @@ export default function Chat() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (content: string) => {
+  const generateResponse = async (prompt: string, factors?: any) => {
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          factors,
+          website: window.location.href,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate response');
+      }
+
+      const data = await response.json();
+      return data.response;
+    } catch (error) {
+      console.error('Error generating response:', error);
+      return "I apologize, but I'm having trouble generating a response right now. Please try again later.";
+    }
+  };
+
+  const renderChart = (data: { [key: string]: number }) => {
+    const maxValue = Math.max(...Object.values(data));
+    const total = Object.values(data).reduce((sum, val) => sum + val, 0);
+
+    return (
+      <div className="chart-container">
+        {Object.entries(data).map(([procedure, price]) => (
+          <div key={procedure} className="chart-bar-container">
+            <div className="chart-label">{procedure}</div>
+            <div className="chart-bar-wrapper">
+              <div 
+                className="chart-bar" 
+                style={{ 
+                  width: `${(price / maxValue) * 100}%`,
+                  backgroundColor: price === maxValue ? '#3b82f6' : '#93c5fd'
+                }}
+              >
+                <span className="chart-value">${price.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+        <div className="chart-total">
+          Total: ${total.toLocaleString()}
+        </div>
+      </div>
+    );
+  };
+
+  const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
 
     const message: Message = {
@@ -74,6 +132,44 @@ export default function Chat() {
         };
         setMessages((prev) => [...prev, formMessage]);
       }, 500);
+    } else {
+      // Generate AI response for other messages
+      setIsLoading(true);
+      const aiResponse = await generateResponse(content);
+      setIsLoading(false);
+
+      // Check if response is a chart
+      if (aiResponse.startsWith('CHART ')) {
+        try {
+          const chartData = JSON.parse(aiResponse.slice(6)); // Remove 'CHART ' prefix
+          const responseMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            content: "Here's a comparison of procedure costs:",
+            sender: "other",
+            timestamp: new Date(),
+            isChart: true,
+            chartData,
+          };
+          setMessages((prev) => [...prev, responseMessage]);
+        } catch (error) {
+          console.error('Error parsing chart data:', error);
+          const errorMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            content: "I apologize, but I couldn't generate the chart properly.",
+            sender: "other",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, errorMessage]);
+        }
+      } else {
+        const responseMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: aiResponse,
+          sender: "other",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, responseMessage]);
+      }
     }
 
     setNewMessage("");
@@ -83,22 +179,38 @@ export default function Chat() {
     handleSendMessage(prompt);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response: Message = {
+    const formMessage = `Thank you for providing your details:
+      - Chest Base Diameter: ${formData.chestBaseDiameter} cm
+      - Skin Envelope: ${formData.skinEnvelope}
+      - Tissue Exposure: ${formData.tissueExposure}
+      - Ramotion: ${formData.ramotion}
+      - Laterality: ${formData.laterality}
+      - BMI: ${formData.bmi}
+      - Desired Aesthetic: ${formData.aesthetic}`;
+
+    const message: Message = {
       id: Date.now().toString(),
-      content: `Thank you for providing your details:
-        - Chest Base Diameter: ${formData.chestBaseDiameter} cm
-        - Skin Envelope: ${formData.skinEnvelope}
-        - Tissue Exposure: ${formData.tissueExposure}
-        - Ramotion: ${formData.ramotion}
-        - Laterality: ${formData.laterality}
-        - BMI: ${formData.bmi}
-        - Desired Aesthetic: ${formData.aesthetic}`,
+      content: formMessage,
       sender: "other",
       timestamp: new Date(),
     };
-    setMessages((prev) => [...prev, response]);
+    setMessages((prev) => [...prev, message]);
+
+    // Generate AI response based on the form data
+    setIsLoading(true);
+    const aiResponse = await generateResponse("Calculate breast implant size based on these factors:", formData);
+    setIsLoading(false);
+
+    const responseMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content: aiResponse,
+      sender: "other",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, responseMessage]);
+
     setFormData({
       chestBaseDiameter: "",
       skinEnvelope: "",
@@ -315,6 +427,14 @@ export default function Chat() {
                             Submit
                           </button>
                         </form>
+                      ) : message.isChart && message.chartData ? (
+                        <>
+                          <p className="chat-message-text">{message.content}</p>
+                          {renderChart(message.chartData)}
+                          <span className="chat-message-timestamp">
+                            {message.timestamp.toLocaleTimeString()}
+                          </span>
+                        </>
                       ) : (
                         <>
                           <p className="chat-message-text">{message.content}</p>
@@ -326,6 +446,19 @@ export default function Chat() {
                     </div>
                   </div>
                 ))}
+                {isLoading && (
+                  <div className="chat-message chat-message-other">
+                    <div className="chat-message-content">
+                      <div className="chat-loading">
+                        <div className="chat-loading-dots">
+                          <div className="chat-loading-dot"></div>
+                          <div className="chat-loading-dot"></div>
+                          <div className="chat-loading-dot"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </>
             )}

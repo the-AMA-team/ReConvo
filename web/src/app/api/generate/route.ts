@@ -25,9 +25,7 @@ export async function POST(req: NextRequest) {
     const { prompt, factors, website } = await req.json(); // resume is a string; instagramData is a json object
 
     // NEED TO BUILD THE USER PROMPT HERE
-    const userPrompt = `prompt: ${prompt} factors: ${JSON.stringify(
-      factors
-    )} website: ${website}`; // this is the user prompt that will be sent to the model
+    const userPrompt = `prompt: ${prompt} factors: ${JSON.stringify(factors)}`; // this is the user prompt that will be sent to the model
 
     const local_systemPrompt = systemPrompt; // the system prompt is a set of instructions that tells the model how to behave
     const local_userPrompt = userPrompt; // the user prompt is the input that the model will respond to
@@ -42,7 +40,7 @@ export async function POST(req: NextRequest) {
       //   // assistant --> if u wanted to save chat history i guess (keep it context aware)
       // ],
       messages: messageHistory,
-      temperature: 0.4,
+      temperature: 0.2,
     });
 
     const response = completion.choices[0].message.content; //chatgpt returns an array of choices, so u chose the first one or something idk

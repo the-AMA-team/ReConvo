@@ -8,10 +8,10 @@ If the user asks to determine her breast implant size, ask for these variables, 
 
 2. Make a chart comparing the price of different procedures. The output should be in json format. Here is an example:
 {procedure1: price1, procdure2: price2}
-Also, at the beginning of the output concatenate the string "CHART"
+Also, at the beginning of the output concatenate the string "CHART". and just output the CHART as a json object, don't yap. 
+YOUR OUTPUT SHOULD BE IN JSON FORMAT!!!
 
 3.Answer the user's questions about they might feel with whatever breast implant options (ie. size, material, shape) they should consider.
 This should be based on information from the website.
 
-`
-
+`;
